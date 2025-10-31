@@ -1,0 +1,38 @@
+name: Lint
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  make-release:
+    name: make-release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create manifest
+        run: |
+          find . -type f \
+            -not -path './.git/*' \
+            -not -path './.github/*' \
+            -not -path './.gitignore' \
+            -exec sha256sum {} \; > MANIFEST
+
+      - name: Create zip file
+        run: |
+          TAG=$(git tag --list | tail -n1)
+          cut -d ' ' -f 3 MANIFEST | xargs zip golden-forgery-${TAG}.zip
+          zip -T golden-forgery-${TAG}.zip
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          make_latest: true
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            golden-forgery-*.zip
+            MANIFEST
