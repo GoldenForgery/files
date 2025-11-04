@@ -21,6 +21,7 @@ jobs:
             -not -path './.git/*' \
             -not -path './.github/*' \
             -not -path './.gitignore' \
+            -not -path './MANIFEST' \
             -exec sha256sum {} \; > MANIFEST
 
       - name: Create zip file
